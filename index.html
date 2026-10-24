@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>과학기술 논쟁 사례판</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 실험 노트(모눈종이) 위에 사례 카드가 붙은 게시판 → 카드를 누르면 찬반 토론 화면 */
+:root{
+  --paper:#f5f7f6; --grid:#e2e9e6; --card:#ffffff; --ink:#1d2a2a; --muted:#5d6b6a; --line:#cfd9d6;
+  --accent:#0f6b5c; --accent-soft:#dcefea;
+  --pro:#2a59c9; --pro-soft:#e3eafb; --con:#c8492a; --con-soft:#fbe6df;
+  --display:"Do Hyeon","IBM Plex Sans KR",system-ui,sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#121918; --grid:#1b2423; --card:#1a2322; --ink:#e4ecea; --muted:#9aaaa7; --line:#2d3a38;
+  --accent:#4cc3ab; --accent-soft:#183a34; --pro:#7aa0ff; --pro-soft:#1c2945; --con:#ff8a6b; --con-soft:#3d2219; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121918; --grid:#1b2423; --card:#1a2322; --ink:#e4ecea; --muted:#9aaaa7; --line:#2d3a38;
+  --accent:#4cc3ab; --accent-soft:#183a34; --pro:#7aa0ff; --pro-soft:#1c2945; --con:#ff8a6b; --con-soft:#3d2219; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;line-height:1.25}
+h1{font-size:clamp(28px,5vw,40px)}
+h2{font-size:26px} h3{font-size:20px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+.top p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--accent);font-weight:700}
+.btn{border:0;border-radius:8px;padding:10px 16px;background:var(--accent);color:var(--card);font-weight:700}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.notice{background:var(--card);border:1.5px dashed var(--line);border-radius:10px;padding:12px 14px;margin-bottom:16px;color:var(--muted);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.case{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.case:hover{border-color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.tag{background:var(--accent-soft);color:var(--accent);border-radius:5px;padding:2px 8px;font-weight:700;font-size:12px}
+.tag.ex{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:500}
+.q{font-weight:700;font-size:15px}
+.q::before{content:"논쟁 질문 ";color:var(--muted);font-weight:500;font-size:12px;display:block;letter-spacing:.04em}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
+.bar i{display:block;height:100%}
+.bar .p{background:var(--pro)} .bar .c{background:var(--con)}
+.tally{display:flex;justify-content:space-between;font-size:13px;font-variant-numeric:tabular-nums}
+.tally .pl{color:var(--pro);font-weight:700} .tally .cl{color:var(--con);font-weight:700}
+.empty{background:var(--card);border:1.5px dashed var(--line);border-radius:12px;padding:32px;text-align:center;color:var(--muted)}
+/* detail */
+.back{background:none;border:0;color:var(--accent);font-weight:700;padding:0;margin-bottom:14px}
+.detail{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:18px}
+.facts{display:grid;gap:14px;grid-template-columns:1fr}
+.facts dt{font-size:12px;color:var(--muted);letter-spacing:.05em;font-weight:700}
+.facts dd{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.bigq{background:var(--paper);border-radius:10px;padding:16px;font-family:var(--display);font-size:22px;line-height:1.35}
+.bigq small{display:block;font-family:var(--body);font-size:12px;color:var(--muted);letter-spacing:.05em}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.side{border-radius:12px;padding:14px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.side.pro{background:var(--pro-soft)} .side.con{background:var(--con-soft)}
+.side h3{display:flex;justify-content:space-between;align-items:baseline}
+.side.pro h3{color:var(--pro)} .side.con h3{color:var(--con)}
+.side h3 span{font-family:var(--body);font-size:14px;font-variant-numeric:tabular-nums}
+.basis{font-size:14px;white-space:pre-wrap;border-bottom:1px solid var(--line);padding-bottom:10px;margin:0}
+.basis b{display:block;font-size:12px;color:var(--muted)}
+.op{background:var(--card);border-radius:8px;padding:10px 12px;font-size:14px;overflow-wrap:anywhere}
+.op .who{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.del{background:none;border:0;color:var(--muted);font-size:12px;text-decoration:underline;padding:0}
+/* forms */
+form{display:grid;gap:14px}
+label{display:grid;gap:4px;font-weight:700;font-size:14px}
+label .hint{font-weight:400;color:var(--muted);font-size:13px}
+input[type=text],select,textarea{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--card)}
+textarea{min-height:80px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.toggle{display:flex;gap:8px}
+.toggle button{flex:1;border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:9px;font-weight:700}
+.toggle .tp[aria-pressed="true"]{background:var(--pro);border-color:var(--pro);color:var(--card)}
+.toggle .tc[aria-pressed="true"]{background:var(--con);border-color:var(--con);color:var(--card)}
+.vals{display:flex;flex-wrap:wrap;gap:6px}
+.vals .chip{font-weight:500}
+.formbox{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:22px}
+.steps{margin:0 0 6px;padding-left:20px;color:var(--muted);font-size:14px}
+.err{color:var(--con);font-size:14px;min-height:1em}
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+.filebtn{display:inline-flex;align-items:center;font-size:15px;cursor:pointer}
+.filebtn input{position:absolute;width:1px;height:1px;opacity:0}
+.filebtn:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.confirm{display:flex;gap:8px;align-items:center;font-size:13px;flex-wrap:wrap}
+@media (max-width:640px){.sides,.row2{grid-template-columns:1fr}.detail,.formbox{padding:16px}}
+@media (prefers-reduced-motion:no-preference){.case{transition:border-color .15s}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">2학년 도덕 · 과학기술과 윤리</div>
+      <h1>과학기술 논쟁 사례판</h1>
+      <p>모둠별로 조사한 과학기술 논쟁 사례를 올리고, 사례마다 찬성·반대 의견과 근거를 남겨요.</p>
+    </div>
+    <div class="tools">
+      <button class="btn ghost" id="exportBtn" type="button">내보내기</button>
+      <label class="btn ghost filebtn" for="importFile">불러오기<input type="file" id="importFile" accept=".json,application/json"></label>
+      <button class="btn" id="newBtn" type="button">+ 사례 올리기</button>
+    </div>
+  </header>
+  <div class="notice" id="notice">입력한 사례와 의견은 이 컴퓨터의 브라우저에 저장돼요. 다른 컴퓨터로 옮기거나 백업하려면 ‘내보내기’로 파일을 받아 두고, 옮길 곳에서 ‘불러오기’를 누르세요.</div>
+  <main id="app"><div class="empty">사례를 불러오는 중이에요…</div></main>
+</div>
+
+<script>
+const FIELDS=["인공지능","생명공학·의료","정보통신·개인정보","환경·에너지","로봇·자동화","기타"];
+const VALUES=["생명 존중","인간 존엄","안전","사생활","책임","공정","자유","환경 보호","창의성"];
+const state={cases:[],ops:[],filter:"전체",view:"list",sel:null,db:null,user:null,uid:null,canWrite:false,admin:false,side:"pro",vals:new Set(),pendingDel:null};
+const app=document.getElementById("app");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const linkify=s=>esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+
+function tally(id){const o=state.ops.filter(x=>x.caseId===id);const p=o.filter(x=>x.side==="pro").length;return{p,c:o.length-p,n:o.length,list:o}}
+function bar(t){if(!t.n)return'<div class="bar"></div>';return`<div class="bar"><i class="p" style="width:${t.p/t.n*100}%"></i><i class="c" style="width:${t.c/t.n*100}%"></i></div>`}
+function mine(x){return state.admin||(state.uid&&x.authorId===state.uid)}
+
+function render(){
+  document.getElementById("newBtn").disabled=!state.canWrite;
+  if(state.view==="new")return renderNew();
+  if(state.view==="detail"){const c=state.cases.find(x=>x.id===state.sel);if(c)return renderDetail(c);state.view="list"}
+  renderList();
+}
+
+function renderList(){
+  const counts={};state.cases.forEach(c=>counts[c.field]=(counts[c.field]||0)+1);
+  const fields=["전체",...FIELDS.filter(f=>counts[f])];
+  const list=state.filter==="전체"?state.cases:state.cases.filter(c=>c.field===state.filter);
+  app.innerHTML=`<div class="chips" role="group" aria-label="분야">${fields.map(f=>`<button type="button" class="chip" data-f="${esc(f)}" aria-pressed="${f===state.filter}">${esc(f)}${f==="전체"?` ${state.cases.length}`:` ${counts[f]}`}</button>`).join("")}</div>
+  ${list.length?`<div class="grid">${list.map(c=>{const t=tally(c.id);return`<button type="button" class="case" data-id="${esc(c.id)}">
+    <div class="meta"><span class="tag">${esc(c.field)}</span>${c.example?'<span class="tag ex">선생님 예시</span>':""}<span>${esc(c.group)}</span></div>
+    <h3>${esc(c.title)}</h3><div class="q">${esc(c.question)}</div>
+    ${bar(t)}<div class="tally"><span class="pl">찬성 ${t.p}</span><span>의견 ${t.n}개</span><span class="cl">반대 ${t.c}</span></div></button>`}).join("")}</div>`
+  :`<div class="empty">아직 올라온 사례가 없어요.<br>‘+ 사례 올리기’를 눌러 모둠이 조사한 첫 사례를 올려 보세요.</div>`}`;
+  app.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{state.filter=b.dataset.f;render()});
+  app.querySelectorAll(".case").forEach(b=>b.onclick=()=>{state.sel=b.dataset.id;state.view="detail";state.pendingDel=null;render();scrollTo(0,0)});
+}
+
+function opHTML(o){return`<div class="op"><div>${esc(o.reason)}</div><div class="who"><span>— ${esc(o.name)}</span>${mine(o)?(state.pendingDel===o.id?`<span class="confirm">지울까요? <button class="del" data-yes="${esc(o.id)}">삭제</button><button class="del" data-no>취소</button></span>`:`<button class="del" data-del="${esc(o.id)}">삭제</button>`):""}</div></div>`}
+
+function renderDetail(c){
+  const t=tally(c.id);const pros=t.list.filter(x=>x.side==="pro"),cons=t.list.filter(x=>x.side==="con");
+  app.innerHTML=`<button class="back" type="button" id="back">← 사례 목록</button>
+  <article class="detail">
+    <div class="meta"><span class="tag">${esc(c.field)}</span>${c.example?'<span class="tag ex">선생님 예시</span>':""}<span>조사: ${esc(c.group)}</span></div>
+    <h2>${esc(c.title)}</h2>
+    <dl class="facts">
+      <div><dt>무슨 일이 있었나요?</dt><dd>${esc(c.what)}</dd></div>
+      ${c.values&&c.values.length?`<div><dt>부딪히는 가치</dt><dd><span class="vals">${c.values.map(v=>`<span class="tag">${esc(v)}</span>`).join("")}</span></dd></div>`:""}
+      ${c.source?`<div><dt>출처</dt><dd>${linkify(c.source)}</dd></div>`:""}
+    </dl>
+    <div class="bigq"><small>논쟁 질문</small>${esc(c.question)}</div>
+    <div>${bar(t)}</div>
+    <div class="sides">
+      <section class="side pro"><h3>찬성 <span>${t.p}명</span></h3>${c.pro?`<p class="basis"><b>조사한 찬성 근거</b>${esc(c.pro)}</p>`:""}${pros.map(opHTML).join("")||'<div class="op" style="color:var(--muted)">아직 찬성 의견이 없어요.</div>'}</section>
+      <section class="side con"><h3>반대 <span>${t.c}명</span></h3>${c.con?`<p class="basis"><b>조사한 반대 근거</b>${esc(c.con)}</p>`:""}${cons.map(opHTML).join("")||'<div class="op" style="color:var(--muted)">아직 반대 의견이 없어요.</div>'}</section>
+    </div>
+    ${state.canWrite?`<div class="formbox" style="padding:16px">
+      <form id="opForm">
+        <h3>내 입장 남기기</h3>
+        <div class="toggle"><button type="button" class="tp" data-side="pro" aria-pressed="${state.side==="pro"}">찬성</button><button type="button" class="tc" data-side="con" aria-pressed="${state.side==="con"}">반대</button></div>
+        <label for="opReason">근거 <span class="hint">예) "나는 ○○ 때문에 ${state.side==="pro"?"찬성":"반대"}한다. 왜냐하면 …"</span>
+          <textarea id="opReason" maxlength="400" required placeholder="나는 ___ 때문에 ${state.side==="pro"?"찬성":"반대"}한다. 왜냐하면 ___"></textarea></label>
+        <label for="opName">이름 또는 모둠 <span class="hint">예) 2반 3모둠 김하늘</span><input type="text" id="opName" maxlength="30" required></label>
+        <div class="err" id="opErr"></div>
+        <div><button class="btn" type="submit">의견 올리기</button></div>
+      </form></div>`:""}
+    ${mine(c)?`<div class="confirm">${state.pendingDel===c.id?`이 사례와 의견을 모두 지울까요? <button class="btn ghost" type="button" data-yesc>삭제</button><button class="btn ghost" type="button" data-no>취소</button>`:`<button class="del" type="button" data-delc>이 사례 삭제</button>`}</div>`:""}
+  </article>`;
+  document.getElementById("back").onclick=()=>{state.view="list";render()};
+  const f=document.getElementById("opForm");
+  if(f){
+    try{document.getElementById("opName").value=localStorage.getItem("debateName")||""}catch(e){}
+    f.querySelectorAll("[data-side]").forEach(b=>b.onclick=()=>{const keep=document.getElementById("opReason").value,nm=document.getElementById("opName").value;state.side=b.dataset.side;render();document.getElementById("opReason").value=keep;document.getElementById("opName").value=nm});
+    f.onsubmit=async e=>{e.preventDefault();const reason=document.getElementById("opReason").value.trim(),name=document.getElementById("opName").value.trim();
+      if(!reason||!name){document.getElementById("opErr").textContent="근거와 이름을 모두 써 주세요.";return}
+      try{localStorage.setItem("debateName",name)}catch(e){}
+      try{await state.db.collection("opinions").add({caseId:c.id,side:state.side,reason,name,authorId:state.uid||"",createdAt:Date.now()})}
+      catch(err){document.getElementById("opErr").textContent=writeErr(err)}};
+  }
+  app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{state.pendingDel=b.dataset.del;render()});
+  app.querySelectorAll("[data-no]").forEach(b=>b.onclick=()=>{state.pendingDel=null;render()});
+  app.querySelectorAll("[data-yes]").forEach(b=>b.onclick=async()=>{state.pendingDel=null;try{await state.db.doc("opinions/"+b.dataset.yes).delete()}catch(e){}});
+  const dc=app.querySelector("[data-delc]");if(dc)dc.onclick=()=>{state.pendingDel=c.id;render()};
+  const yc=app.querySelector("[data-yesc]");if(yc)yc.onclick=async()=>{state.pendingDel=null;state.view="list";
+    try{for(const o of t.list){if(mine(o))await state.db.doc("opinions/"+o.id).delete()}await state.db.doc("cases/"+c.id).delete()}catch(e){}render()};
+}
+
+function writeErr(err){if(err&&err.code==="quota_exceeded")return"저장 공간이 가득 찼어요. 선생님께 알려 주세요.";if(err&&err.code==="invalid_argument"){state.canWrite=false;return"이 화면에서는 저장할 수 있는 권한이 없어요."}return"저장하지 못했어요. 잠시 후 다시 눌러 주세요."}
+
+function renderNew(){
+  app.innerHTML=`<button class="back" type="button" id="back">← 사례 목록</button>
+  <div class="formbox"><form id="caseForm">
+    <h2>논쟁 사례 올리기</h2>
+    <ol class="steps"><li>뉴스·기사에서 과학기술 때문에 생긴 문제를 찾는다.</li><li>무슨 일이 있었는지 내 말로 정리한다.</li><li>찬성과 반대로 나뉠 수 있는 질문을 만든다.</li></ol>
+    <label for="cTitle">사례 제목 <span class="hint">예) 자율주행차 사고, 누구 책임일까?</span><input type="text" id="cTitle" maxlength="60" required></label>
+    <div class="row2">
+      <label for="cField">분야<select id="cField">${FIELDS.map(f=>`<option>${f}</option>`).join("")}</select></label>
+      <label for="cGroup">조사한 모둠·이름<input type="text" id="cGroup" maxlength="30" required placeholder="2반 3모둠"></label>
+    </div>
+    <label for="cWhat">무슨 일이 있었나요? <span class="hint">언제, 어디서, 어떤 기술 때문에 어떤 일이 생겼는지 3~5문장</span><textarea id="cWhat" maxlength="1200" required></textarea></label>
+    <label for="cQ">논쟁 질문 <span class="hint">‘~해야 한다’ 또는 ‘~해도 된다’로 끝나게 쓰면 찬반이 잘 나뉘어요</span><input type="text" id="cQ" maxlength="100" required placeholder="예) 질병을 막기 위해 아기의 유전자를 바꿔도 된다"></label>
+    <div class="row2">
+      <label for="cPro">찬성 측 근거 <span class="hint">찬성하는 사람들은 왜 그렇게 생각할까?</span><textarea id="cPro" maxlength="800"></textarea></label>
+      <label for="cCon">반대 측 근거 <span class="hint">반대하는 사람들은 왜 그렇게 생각할까?</span><textarea id="cCon" maxlength="800"></textarea></label>
+    </div>
+    <div><div style="font-weight:700;font-size:14px;margin-bottom:6px">이 사례에서 부딪히는 가치 <span style="font-weight:400;color:var(--muted);font-size:13px">여러 개 골라도 돼요</span></div>
+      <div class="vals" id="vals">${VALUES.map(v=>`<button type="button" class="chip" data-v="${v}" aria-pressed="${state.vals.has(v)}">${v}</button>`).join("")}</div></div>
+    <label for="cSrc">출처 <span class="hint">기사 제목과 링크, 또는 책·영상 이름</span><input type="text" id="cSrc" maxlength="300"></label>
+    <div class="err" id="cErr"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="submit">사례 올리기</button><button class="btn ghost" type="button" id="cancel">취소</button></div>
+  </form></div>`;
+  const back=()=>{state.view="list";state.vals.clear();render()};
+  document.getElementById("back").onclick=back;document.getElementById("cancel").onclick=back;
+  try{document.getElementById("cGroup").value=localStorage.getItem("debateName")||""}catch(e){}
+  app.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{const v=b.dataset.v;state.vals.has(v)?state.vals.delete(v):state.vals.add(v);b.setAttribute("aria-pressed",state.vals.has(v))});
+  document.getElementById("caseForm").onsubmit=async e=>{e.preventDefault();
+    const g=id=>document.getElementById(id).value.trim();
+    const d={title:g("cTitle"),field:g("cField"),group:g("cGroup"),what:g("cWhat"),question:g("cQ"),pro:g("cPro"),con:g("cCon"),source:g("cSrc"),values:[...state.vals],authorId:state.uid||"",createdAt:Date.now()};
+    if(!d.title||!d.group||!d.what||!d.question){document.getElementById("cErr").textContent="제목, 모둠·이름, 무슨 일이 있었나요, 논쟁 질문은 꼭 써 주세요.";return}
+    try{localStorage.setItem("debateName",d.group)}catch(e){}
+    try{const ref=await state.db.collection("cases").add(d);state.vals.clear();state.sel=ref.id;state.view="detail";render();scrollTo(0,0)}
+    catch(err){document.getElementById("cErr").textContent=writeErr(err)}};
+}
+
+
+const KEY="sciDebateBoard.v1";
+const SEED=[
+{id:"ex-autonomous-car",example:true,title:"자율주행차 사고, 누구 책임일까?",field:"인공지능",group:"선생님 예시",what:"자동차가 스스로 핸들과 브레이크를 조작하는 자율주행 기능이 점점 늘어나고 있다. 그런데 자율주행 기능을 켜 둔 차가 사고를 내는 일이 국내외에서 생기고 있다. 운전자는 '차가 운전하고 있었다'고 말하고, 회사는 '운전자가 계속 지켜봐야 했다'고 말한다.",question:"자율주행차 사고의 책임은 자동차 회사가 져야 한다",pro:"운전을 실제로 한 것은 회사가 만든 프로그램이다. 회사가 책임을 지면 더 안전하게 만들려고 노력할 것이다.",con:"운전자는 언제든 직접 운전할 준비를 해야 한다. 회사에만 책임을 지우면 기술 개발이 느려질 수 있다.",values:["안전","책임"],source:"",createdAt:1792800000000},
+{id:"ex-gene-baby",example:true,title:"유전자 가위로 아기의 유전자를 바꿔도 될까?",field:"생명공학·의료",group:"선생님 예시",what:"2018년 중국의 한 과학자가 '유전자 가위' 기술로 수정란의 유전자를 바꿔 쌍둥이 아기를 태어나게 했다고 발표했다. 에이즈에 걸리지 않게 하려는 목적이라고 했지만, 전 세계 과학자들은 안전성이 확인되지 않은 실험이라며 크게 비판했고 그 과학자는 처벌을 받았다.",question:"질병을 막기 위해서라면 아기의 유전자를 바꿔도 된다",pro:"심각한 유전병으로 고통받는 아이를 미리 막을 수 있다. 의학 기술은 사람을 돕기 위해 써야 한다.",con:"부작용을 아직 모르고, 바뀐 유전자는 자손에게까지 이어진다. 키나 외모까지 고르는 '맞춤 아기'로 번질 수 있다.",values:["생명 존중","인간 존엄","안전"],source:"",createdAt:1792800001000},
+{id:"ex-ai-art",example:true,title:"AI가 그린 그림이 미술 대회 1등?",field:"인공지능",group:"선생님 예시",what:"2022년 미국의 한 미술 대회 디지털 아트 부문에서 AI 그림 프로그램으로 만든 작품이 1등을 했다. 작가는 문장을 수백 번 고쳐 입력하고 결과를 다듬었다고 말했지만, 다른 참가자들은 '직접 그리지 않은 그림'이라며 불공평하다고 항의했다.",question:"AI로 만든 그림도 사람의 예술 작품으로 인정해야 한다",pro:"카메라로 찍은 사진도 예술로 인정받듯, AI도 하나의 도구일 뿐이다. 어떤 그림을 만들지 정한 것은 사람이다.",con:"AI는 다른 화가들의 그림을 학습해서 만든다. 손으로 오래 연습한 사람들과 같은 기준으로 겨루는 것은 공정하지 않다.",values:["공정","창의성"],source:"",createdAt:1792800002000},
+{id:"ex-face-cctv",example:true,title:"얼굴을 알아보는 CCTV, 늘려도 될까?",field:"정보통신·개인정보",group:"선생님 예시",what:"CCTV에 얼굴 인식 기술을 붙이면 지나가는 사람이 누구인지 자동으로 찾아낼 수 있다. 범죄자나 실종된 아이를 빨리 찾는 데 쓸 수 있지만, 아무 잘못 없는 사람들의 움직임까지 기록된다는 걱정도 있다.",question:"범죄를 막기 위해 공공장소에 얼굴 인식 CCTV를 늘려야 한다",pro:"범죄자를 빨리 잡고 실종된 아이나 치매 어르신을 찾을 수 있다. 사람들이 더 안심하고 다닐 수 있다.",con:"내가 언제 어디에 갔는지 모두 기록되어 사생활이 침해된다. 기계가 사람을 잘못 알아봐서 억울한 사람이 생길 수 있다.",values:["안전","사생활","자유"],source:"",createdAt:1792800003000}];
+let store={cases:[],opinions:[]},canSave=true;
+function load(){try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);store={cases:Array.isArray(d.cases)?d.cases:[],opinions:Array.isArray(d.opinions)?d.opinions:[]};return}}catch(e){canSave=false}store={cases:SEED.map(c=>({...c})),opinions:[]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));return true}catch(e){canSave=false;showWarn();return false}}
+function showWarn(){const n=document.getElementById("notice");n.textContent="이 브라우저에서는 저장이 되지 않아요. 창을 닫으면 내용이 사라지니, 끝나기 전에 ‘내보내기’로 꼭 파일을 받아 두세요.";n.style.color="var(--con)"}
+function refresh(){state.cases=[...store.cases].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));state.ops=[...store.opinions].sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));render()}
+const newId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const localDb={
+  collection(name){const key=name==="cases"?"cases":"opinions";return{add:async d=>{const id=newId();store[key].push({id,...d});save();refresh();return{id}}}},
+  doc(path){const [name,id]=path.split("/");const key=name==="cases"?"cases":"opinions";return{delete:async()=>{store[key]=store[key].filter(x=>x.id!==id);save();refresh()}}}
+};
+
+document.getElementById("newBtn").onclick=()=>{state.view="new";render();scrollTo(0,0)};
+document.getElementById("exportBtn").onclick=()=>{
+  const d=new Date(),p=n=>String(n).padStart(2,"0");
+  const blob=new Blob([JSON.stringify(store,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`과학기술논쟁_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}.json`;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
+document.getElementById("importFile").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{const n=document.getElementById("notice");
+    try{const d=JSON.parse(r.result);if(!Array.isArray(d.cases)||!Array.isArray(d.opinions))throw 0;
+      const cid=new Set(store.cases.map(x=>x.id)),oid=new Set(store.opinions.map(x=>x.id));
+      const nc=d.cases.filter(x=>x&&x.id&&!cid.has(x.id)),no=d.opinions.filter(x=>x&&x.id&&!oid.has(x.id));
+      store.cases.push(...nc);store.opinions.push(...no);save();refresh();
+      n.style.color="";n.textContent=`불러오기 완료: 사례 ${nc.length}개, 의견 ${no.length}개를 새로 더했어요. 이미 있던 내용은 그대로 두었어요.`}
+    catch(err){n.style.color="var(--con)";n.textContent="불러오지 못했어요. 이 사례판에서 ‘내보내기’로 받은 .json 파일인지 확인해 주세요."}
+    e.target.value=""};
+  r.readAsText(f,"utf-8")};
+load();
+state.db=localDb;state.canWrite=true;state.admin=true;
+if(!canSave)showWarn();
+refresh();
+</script>
+</body>
+</html>
